@@ -442,12 +442,10 @@ uint8_t btnRepeatCounter = 0; // keeps track of how often a button press has bee
 int getOrientation()
 {
   int y = mpu6050.getAngleY();
-  #ifdef DEBUG
-    Serial.println("=======================================================");
-    Serial.print("angleY : ");Serial.print(y);
-    Serial.println("=======================================================\n");
-  #endif
-  return (y <= 1) ? 1 : 0; // 1 indicates right side up, 0 upside down
+  // should be abt 0 if setting upright
+  // + or - more than 130 when turned over (abt 170)
+  // so if flipped, y should be less than -130, or greater than 130
+  return (y < -130 || y > 130) ? 0 : 1; // 1 indicates right side up, 0 upside down
 }
 void checkFlip()
 {
@@ -455,9 +453,7 @@ void checkFlip()
   // if flipped over, toggle schema
   if (ORIENTATION == 1 && currentOrientation == 0)
   {
-#ifdef DEBUG
     Serial.println("flipped!");
-#endif
     // toggle pallet
     paletteSwitcher();
   }
@@ -579,9 +575,7 @@ void setup()
 #endif
 
 #ifdef USEGYRO
-#ifdef DEBUG
   Serial.println(F("Setting up mpu6050..."));
-#endif
   Wire.begin();
   mpu6050.begin();
   mpu6050.calcGyroOffsets(true);
